@@ -5,9 +5,13 @@ namespace App\Entity;
 use App\Repository\ProduitRepository;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 /**
  * @ORM\Entity(repositoryClass=ProduitRepository::class)
+ * @Vich\Uploadable
  */
 class Produit
 {
@@ -54,12 +58,30 @@ class Produit
     private $description;
 
     /**
+     * NOTE: This is not a mapped field of entity metadata, just a simple property.
+     *
+     * @Vich\UploadableField(mapping="product_image", fileNameProperty="imageName", size="imageSize")
+     *
+     * @var File|null
+     */
+    private $imageFile;
+
+    /**
+     * @ORM\Column(type="string")
+     *
+     * @var string|null
+     */
+    private $imageName;
+
+    /**
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="datetime")
+     *
+     * @var \DateTimeInterface|null
      */
     private $updatedAt;
 
@@ -209,5 +231,40 @@ class Produit
         $this->categorie = $categorie;
 
         return $this;
+    }
+
+    /**
+     * @param File|UploadedFile|null $imageFile
+     */
+    public function setImageFile(?File $imageFile): void
+    {
+        $this->imageFile = $imageFile;
+        if (null !== $imageFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    /**
+     * @return File|null
+     */
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getImageName(): ?string
+    {
+        return $this->imageName;
+    }
+
+    /**
+     * @param string|null $imageName
+     */
+    public function setImageName(?string $imageName): void
+    {
+        $this->imageName = $imageName;
     }
 }
